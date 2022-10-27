@@ -4,10 +4,14 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.Buffer;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.stream.Stream;
 
+import db.DataBase;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -28,33 +32,51 @@ public class RequestHandler extends Thread {
             BufferedReader bufferedReader = new BufferedReader(reader);
             String r;
             byte[] bytes;
-
             if ((r = bufferedReader.readLine()) != null) {
                 log.info(r);
-                String path;
                 String[] split = r.split(" ");
-                int indexOf = split[1].indexOf("?");
-                if (indexOf == -1) {
+                String url = split[1];
 
-                }
-
-                if (split[1].equals("/index.html")) {
-                    log.info("index.html 요청입니다.");
-
-                    // 파일읽기
+                // error 발생 가능성이 있다.
+                String requestPath = HttpRequestUtils.getPath(url);
+                String params = HttpRequestUtils.getParam(url);
+                if(requestPath.equals("/index.html")){
                     bytes = Files.readAllBytes(new File(("./webapp" + split[1])).toPath());
                     DataOutputStream dos = new DataOutputStream(out);
                     response200Header(dos, bytes.length);
                     responseBody(dos, bytes);
-
-                }else if(split[1].equals("/user/form.html")){
+                } else if (requestPath.equals("/user/form.html")) {
                     log.info("로그인 페이지 요청입니다.");
                     // 파일읽기
+
                     bytes = Files.readAllBytes(new File(("./webapp" + split[1])).toPath());
                     DataOutputStream dos = new DataOutputStream(out);
                     response200Header(dos, bytes.length);
                     responseBody(dos, bytes);
-                }else{
+                } else if(requestPath.equals("/user/create")){
+                    log.info("회원가입 생성 요청");
+
+
+                    // 딱 봐도 관심사를 분리하고 싶은 충동이 든다.
+                    assert params != null;
+
+                    // request parsing
+                    Map<String, String> map = HttpRequestUtils.parseQueryString(params);
+                    CreateUserRequest userRequest = CreateUserRequest.of(map);
+
+                    // create user
+                    User user = User.create(userRequest);
+
+                    // save user
+                    DataBase.addUser(user);
+
+
+                    DataOutputStream dos = new DataOutputStream(out);
+                    byte[] body = "HelloWorld".getBytes();
+                    response200Header(dos, body.length);
+                    responseBody(dos, body);
+
+                } else {
                     // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
                     DataOutputStream dos = new DataOutputStream(out);
                     byte[] body = "HelloWorld".getBytes();

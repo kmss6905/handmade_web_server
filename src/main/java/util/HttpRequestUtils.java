@@ -8,6 +8,25 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 public class HttpRequestUtils {
+
+    public static String getPath(String url) {
+        // search for "?" is existed
+        int index = url.indexOf("?");
+        if (index == -1) {
+            return url;
+        }
+        return url.substring(0, index);
+    }
+
+
+    public static String getParam(String url) {
+        // search for "?" is existed
+        int index = url.indexOf("?");
+        if (index == -1) {
+            return null;
+        }
+        return url.substring(index + 1);
+    }
     /**
      * @param queryString은
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
