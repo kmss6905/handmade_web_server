@@ -31,11 +31,6 @@ public class RequestHandler extends Thread {
 
             if ((r = bufferedReader.readLine()) != null) {
                 log.info(r);
-                String[] split = r.split(" ");
-
-                if (split[1].equals("/user/create?")) {
-                    log.info("로그인 요청");
-                }
 
                 if (split[1].equals("/index.html")) {
                     log.info("index.html 요청입니다.");
