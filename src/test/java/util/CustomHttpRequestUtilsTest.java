@@ -1,6 +1,8 @@
 package util;
 
+import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,21 +10,19 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CustomHttpRequestUtilsTest {
+public class CustomHttpRequestUtilsTest{
     private static final Logger log = LoggerFactory.getLogger(CustomHttpRequestUtilsTest.class);
 
-    /**
-     * /user/create?userId=javagiki@password=javagiki11&name=minshik
-     */
+    private static String url;
 
-    @Test
-    public void parseQueryParamInStringURL() {
 
+    @Before
+    public void setUp() throws Exception {
+        url = "/user/create?userId=javagiki&password=javagiki11&name=minshik";
     }
 
     @Test
     public void splitPathAndParam() {
-        String url = "/user/create?userId=javagiki@password=javagiki11&name=minshik";
         String path = UrlParser.parsePath(url);
 
 
@@ -32,15 +32,12 @@ public class CustomHttpRequestUtilsTest {
 
     @Test
     public void parseParam() {
-        String url = "/user/create?userId=javagiki&password=javagiki11&name=minshik";
         String param = UrlParser.getParam(url);
-        log.info("param : {}", param);
+        Assert.assertEquals("userId=javagiki&password=javagiki11&name=minshik",param);
     }
 
     @Test
     public void getKeyAndValueFromURlParam() {
-        // given
-        String url = "/user/create?userId=javagiki&password=javagiki11&name=minshik";
 
         // when
         Map<String, String> map = UrlParser.parseParam(url);
