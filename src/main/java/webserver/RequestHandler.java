@@ -31,6 +31,12 @@ public class RequestHandler extends Thread {
 
             if ((r = bufferedReader.readLine()) != null) {
                 log.info(r);
+                String path;
+                String[] split = r.split(" ");
+                int indexOf = split[1].indexOf("?");
+                if (indexOf == -1) {
+
+                }
 
                 if (split[1].equals("/index.html")) {
                     log.info("index.html 요청입니다.");
