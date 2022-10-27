@@ -17,8 +17,10 @@ public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private Socket connection;
+    private UserService userService;
 
     public RequestHandler(Socket connectionSocket) {
+        this.userService = new UserService();
         this.connection = connectionSocket;
     }
 
@@ -56,19 +58,13 @@ public class RequestHandler extends Thread {
                 } else if(requestPath.equals("/user/create")){
                     log.info("회원가입 생성 요청");
 
-
-                    // 딱 봐도 관심사를 분리하고 싶은 충동이 든다.
-                    assert params != null;
-
                     // request parsing
                     Map<String, String> map = HttpRequestUtils.parseQueryString(params);
                     CreateUserRequest userRequest = CreateUserRequest.of(map);
 
-                    // create user
-                    User user = User.create(userRequest);
-
                     // save user
-                    DataBase.addUser(user);
+                    userService.save(userRequest);
+
 
 
                     DataOutputStream dos = new DataOutputStream(out);
