@@ -3,6 +3,8 @@ package webserver;
 
 import com.google.common.base.Strings;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 // 회원가입 요청
@@ -19,17 +21,19 @@ public class CreateUserRequest {
         CreateUserRequest createUserRequest = new CreateUserRequest();
         createUserRequest.email = createUserParam.get("email");
         createUserRequest.userId = createUserParam.get("userId");
-        createUserRequest.name = createUserParam.get("name");
+        createUserRequest.name = URLDecoder.decode(createUserParam.get("name"), StandardCharsets.UTF_8);
         createUserRequest.password = createUserParam.get("password");
         return createUserRequest;
     }
 
-    private static String getUserID(Map<String, String> createUserParam) {
-        // null check
-        if (createUserParam.get("userId") == null) {
-
-        }
-        return createUserParam.get("userId");
+    @Override
+    public String toString() {
+        return "CreateUserRequest{" +
+                "userId='" + userId + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
 
     private static void nullCheck(Map<String, String> createUserParam) {
