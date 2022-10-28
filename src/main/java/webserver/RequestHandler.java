@@ -45,6 +45,7 @@ public class RequestHandler extends Thread {
 
             DataOutputStream dos = new DataOutputStream(out);
             switch (method) {
+
                 case GET:
                 default:
                     if (path.equals("/user/form.html")) {
@@ -57,7 +58,14 @@ public class RequestHandler extends Thread {
                     response200Header(dos, bytes.length);
                     responseBody(dos, bytes);
                 case POST:
+
                     if (path.equals("/user/create")) {
+                        StringBuilder content = new StringBuilder();
+                        for (int i = 0; i < 100; i++) {
+                            content.append((char) br.read());
+                        }
+
+                        log.info("body : {}", content.toString());
                         // get body
                         bytes = "HelloWorld".getBytes();
                         response200Header(dos, bytes.length);
