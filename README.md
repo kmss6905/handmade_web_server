@@ -29,7 +29,28 @@ HTTP 본문은 HTTP 헤더 이후 빈 공백을 가지는 한 줄(line) 다음�
 
 
 ### 요구사항 3 - post 방식으로 회원가입
-* 
+데이터를 읽기위해서는 content 길이가 필요하다. 그렇지 않으면 반복해서 읽어야한다.
+기존 구현 방식 하지만, 스트림 끝에 도달하면 -1을 반환하고 while 문을 빠져나올 것으로 예상했지만 전혀 그렇지 않음
+```java
+while ((i = br.read()) != -1) {
+    char c = (char) i;
+    content.append(c);
+    log.info("content : {}", content);
+}
+```
+
+```java
+
+public class IOUtils {
+    
+    public static String readData(BufferedReader br, int contentLength) throws IOException {
+        char[] body = new char[contentLength];
+        br.read(body, 0, contentLength);
+        return String.copyValueOf(body);
+    }
+}
+
+```
 
 ### 요구사항 4 - redirect 방식으로 이동
 * 

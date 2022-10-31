@@ -9,6 +9,7 @@ import http.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -16,6 +17,7 @@ public class RequestHandler extends Thread {
     private Socket connection;
     private UserService userService;
 
+    // 스레드 생성
     public RequestHandler(Socket connectionSocket) {
         this.userService = new UserService();
         this.connection = connectionSocket;
@@ -36,11 +38,16 @@ public class RequestHandler extends Thread {
             String path = getPath(firstLine);
             String params = getQueryParam(firstLine);
 
-            log.info("method : {}, path : {}, params : {}", method, path, params);
 
+
+            log.info("method : {}, path : {}, params : {}", method, path, params);
+            int contentLength = 0;
             // header
             while ((r = br.readLine()).length() != 0) {
                 log.info("header info : {}", r);
+                if (r.contains("Content-Length")) {
+                    contentLength = getContentLength(r);
+                }
             }
 
             DataOutputStream dos = new DataOutputStream(out);
@@ -58,15 +65,22 @@ public class RequestHandler extends Thread {
                     response200Header(dos, bytes.length);
                     responseBody(dos, bytes);
                 case POST:
-
+                    StringBuilder content = new StringBuilder();
                     if (path.equals("/user/create")) {
-                        StringBuilder content = new StringBuilder();
-                        for (int i = 0; i < 100; i++) {
-                            content.append((char) br.read());
+                        // request content 의 길이를 구해야한다.
+                        int i = 0;
+                        // 작동을 하지 않는다?
+                        while ((i = br.read()) != -1) {
+                            char c = (char) i;
+                            content.append(c);
+                            log.info("content : {}", content);
                         }
+                        log.info("while 문 빠져나온다. content={}", content);
 
-                        log.info("body : {}", content.toString());
-                        // get body
+//                        log.info("contentLength : {}", contentLength);
+//                        String s = IOUtils.readData(br, contentLength);
+//                        log.info("s : {}", s);
+
                         bytes = "HelloWorld".getBytes();
                         response200Header(dos, bytes.length);
                         responseBody(dos, bytes);
@@ -127,6 +141,12 @@ public class RequestHandler extends Thread {
     }
 
     private void parseHeader(String line) throws IOException {
+
+    }
+
+    private int getContentLength(String line) {
+        String[] headerTokens = line.split(":");
+        return Integer.parseInt(headerTokens[1].trim());
     }
 
     private void parseBody(String line) {
