@@ -53,7 +53,21 @@ public class IOUtils {
 ```
 
 ### 요구사항 4 - redirect 방식으로 이동
-* 
+HTTP 응답 상태 코드 302 Found 는 URL 리다이렉션을 하게하는 일반적인 방법이다.
+뿐만 아니라 특정 URL 을 가리키는 'Location' 헤더가 HTTP 302 응답에 담겨있다.  이건 사용자 에이전트(예, 브라우저)에 대한 초대로, Location 필드에 
+지정된 새 URL 에 요청을 하도록 한다. 즉, 새 URL 로 리다리엑션(말 그래도 재 이동, Redirection)이 되는 것이다.
+
+client request
+```text
+GET /index.html HTTP/1.1
+Host: www.example.com
+```
+
+server request
+```text
+HTTP/1.1 302 Found
+Location: http://www.iana.org/domains/example/
+```
 
 ### 요구사항 5 - cookie
 * 

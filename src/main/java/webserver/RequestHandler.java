@@ -3,6 +3,7 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Map;
 
 import com.google.common.base.Strings;
 import http.Method;
@@ -37,14 +38,10 @@ public class RequestHandler extends Thread {
             Method method = getMethod(firstLine);
             String path = getPath(firstLine);
             String params = getQueryParam(firstLine);
-
-
-
             log.info("method : {}, path : {}, params : {}", method, path, params);
             int contentLength = 0;
             // header
             while ((r = br.readLine()).length() != 0) {
-                log.info("header info : {}", r);
                 if (r.contains("Content-Length")) {
                     contentLength = getContentLength(r);
                 }
@@ -55,35 +52,31 @@ public class RequestHandler extends Thread {
 
                 case GET:
                 default:
-                    if (path.equals("/user/form.html")) {
-                        // body
-                        bytes = Files.readAllBytes(new File(("./webapp" + path)).toPath());
-                    }else{
-                        // default
-                        bytes = "HelloWorld".getBytes();
-                    }
+                    bytes = Files.readAllBytes(new File(("./webapp" + path)).toPath());
                     response200Header(dos, bytes.length);
                     responseBody(dos, bytes);
                 case POST:
-                    StringBuilder content = new StringBuilder();
-                    if (path.equals("/user/create")) {
-                        // request content 의 길이를 구해야한다.
-                        int i = 0;
-                        // 작동을 하지 않는다?
-                        while ((i = br.read()) != -1) {
-                            char c = (char) i;
-                            content.append(c);
-                            log.info("content : {}", content);
+                    if (path.equals("/user/login")) {
+                        String body = IOUtils.readData(br, contentLength);
+                        Map<String, String> map = HttpRequestUtils.parseQueryString(body);
+                        String userId = map.get("userId");
+                        String password = map.get("password");
+                        boolean isLogin = userService.login(userId, password);
+                        if (isLogin) {
+                            // Cookie 헤더 logined=true
+                        }else{
+                            // Cookie 헤더 logined=false
                         }
-                        log.info("while 문 빠져나온다. content={}", content);
+                    }
 
-//                        log.info("contentLength : {}", contentLength);
-//                        String s = IOUtils.readData(br, contentLength);
-//                        log.info("s : {}", s);
+                    if (path.equals("/user/create")) {
+                        String body = IOUtils.readData(br, contentLength);
+                        Map<String, String> map = HttpRequestUtils.parseQueryString(body);
 
-                        bytes = "HelloWorld".getBytes();
-                        response200Header(dos, bytes.length);
-                        responseBody(dos, bytes);
+                        // 비지니스 로직
+                        userService.save(CreateUserRequest.of(map));
+
+                        response302Header(dos);
                     }
                 case PATCH:
                 case DELETE:
@@ -101,6 +94,16 @@ public class RequestHandler extends Thread {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302Header(DataOutputStream dos) {
+        try {
+            dos.writeBytes("HTTP/1.1 301 Moved Temporarily\r\n");
+            dos.writeBytes("Location: http://localhost:8080/index.html");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
