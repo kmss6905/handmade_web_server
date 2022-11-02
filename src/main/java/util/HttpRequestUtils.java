@@ -76,7 +76,7 @@ public class HttpRequestUtils {
         String key;
         String value;
 
-        Pair(String key, String value) {
+        public Pair(String key, String value) {
             this.key = key.trim();
             this.value = value.trim();
         }

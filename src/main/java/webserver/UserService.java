@@ -5,8 +5,6 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.crypto.Data;
-
 public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
@@ -23,6 +21,9 @@ public class UserService {
     // login
     public boolean login(String userId, String password) {
         User user = DataBase.findUserById(userId);
-        return user.matchPassword(password);
+        if (user == null) {
+            return false;
+        }
+        return user.loginWith(password);
     }
 }

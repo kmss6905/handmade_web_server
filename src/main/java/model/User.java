@@ -26,7 +26,7 @@ public class User {
         return email;
     }
 
-    public boolean matchPassword(String password) {
+    public boolean loginWith(String password) {
         return this.password.equals(password);
     }
 
