@@ -15,15 +15,26 @@ public class HttpRequest {
         this.firstLine = getFirstLine();
     }
 
-    private String getFirstLine() throws IOException {
-        return this.bufferedReader.readLine();
+    public String getPath() {
+        String[] s = firstLines(this.firstLine);
+        return s[1];
     }
-
     public Method getMethod() {
         assert this.bufferedReader != null;
-        String[] s = this.firstLine.split(" ");
-        String method = s[0];
-        return Method.valueOf(method);
+        String[] s = firstLines(this.firstLine);
+        return Method.valueOf(s[0]);
+    }
+
+    private String[] firstLines(String firstLine) {
+        return this.splitFromSeparator(firstLine, " ");
+    }
+
+    private String[] splitFromSeparator(String line, String separator) {
+        return line.split(separator);
+    }
+
+    private String getFirstLine() throws IOException {
+        return this.bufferedReader.readLine();
     }
 
     public String getHeader(String key) {
