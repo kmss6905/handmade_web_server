@@ -1,10 +1,11 @@
 package http;
 
-import org.junit.Before;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.Request;
 
 import java.io.*;
+
+import static http.Method.GET;
 
 public class HttpRequestTest {
 
@@ -25,9 +26,13 @@ public class HttpRequestTest {
 
 
     @Test
-    public void HTTPRequest객체로부터메서드를반환한다() throws FileNotFoundException {
-        InputStream is = new FileInputStream("/Users/minshik/Desktop/study/java-nextstep/handmade_web_server/src/test/java/example/Http_Get.txt");
-        InputStreamReader reader = new InputStreamReader(is);
+    public void HTTPRequest로부터_HTTP메서드를_반환한다() throws IOException {
+        // given
+        InputStream inputStream = new FileInputStream("/Users/minshik/Desktop/study/java-nextstep/handmade_web_server/src/test/resources/Http_Get.txt");
+        HttpRequest httpRequest = new HttpRequest(inputStream);
+
+        // then
+        Assert.assertEquals(httpRequest.getMethod(), GET);
     }
 
 
