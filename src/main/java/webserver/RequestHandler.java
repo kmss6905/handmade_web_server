@@ -35,8 +35,6 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line;
             byte[] bytes;
-
-
             String firstLine = br.readLine();
             Method method = getMethod(firstLine);
             String path = getPath(firstLine);
