@@ -1,28 +1,57 @@
 package http;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpRequest {
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+
     private BufferedReader bufferedReader;
-    private final String firstLine;
+    private final String[] firstLines;
+    private final Map<String, String> headers;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         this.bufferedReader = toBufferReader(inputStream);
-        this.firstLine = getFirstLine();
+        this.firstLines = firstLines(getFirstLine());
+        this.headers = initHeader();
     }
 
     public String getPath() {
-        String[] s = firstLines(this.firstLine);
-        return s[1];
+        return this.firstLines[1];
     }
     public Method getMethod() {
-        assert this.bufferedReader != null;
-        String[] s = firstLines(this.firstLine);
-        return Method.valueOf(s[0]);
+        return Method.valueOf(this.firstLines[0]);
+    }
+
+    public String getHeader(String key) {
+        if (!this.headers.containsKey(key)) {
+            return "";
+        }
+        return this.headers.get(key);
+    }
+
+    public Map<String, String> initHeader() throws IOException {
+        // init header
+        log.info("start processing parse request from inputStream ");
+        String l;
+        Map<String, String> headers = new HashMap<>();
+        while (!(l = this.bufferedReader.readLine()).equals("")) {
+            String[] kv = splitFromSeparator(l, ": ");
+            headers.put(kv[0], kv[1]);
+        }
+        log.info("end processing parse request from inputStream ");
+        headers.keySet().forEach(key -> System.out.println(
+                "header key : " + key + ", value : " + headers.get(key)
+        ));
+        return headers;
     }
 
     private String[] firstLines(String firstLine) {
@@ -37,13 +66,6 @@ public class HttpRequest {
         return this.bufferedReader.readLine();
     }
 
-    public String getHeader(String key) {
-        return "";
-    }
-
-    public String getURL() {
-        return "";
-    }
 
     private static BufferedReader toBufferReader(InputStream inputStream) {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
