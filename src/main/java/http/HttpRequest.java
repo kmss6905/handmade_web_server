@@ -8,7 +8,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
@@ -17,16 +19,22 @@ public class HttpRequest {
     private BufferedReader bufferedReader;
     private final String[] firstLines;
     private final Map<String, String> headers;
+    private final int contentLength;
+    private final Map<String, List<String>> parameters;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         this.bufferedReader = toBufferReader(inputStream);
         this.firstLines = firstLines(getFirstLine());
         this.headers = initHeader();
+        this.contentLength = getContentLength();
+        this.parameters = initParameter();
     }
 
     public String getPath() {
-        return this.firstLines[1];
+        return splitFromSeparator(this.firstLines[1], "\\?")[0];
     }
+
+
     public Method getMethod() {
         return Method.valueOf(this.firstLines[0]);
     }
@@ -38,13 +46,58 @@ public class HttpRequest {
         return this.headers.get(key);
     }
 
+    private int getContentLength() {
+        if (!this.headers.containsKey("Content-Length")) {
+            return 0;
+        }
+        return Integer.parseInt(this.headers.get("Content-Length"));
+    }
+
+    public List<String> getParameter(String key) throws IOException {
+        return this.parameters.get(key);
+    }
+
+    private Map<String, List<String>> parseParam(String line) {
+        String[] kvs = line.split("&");
+        Map<String, List<String>> map = new HashMap<>();
+        for (String kv : kvs) {
+            String[] splitFromSeparator = splitFromSeparator(kv, "=");
+            String key = splitFromSeparator[0];
+            String value = splitFromSeparator[1];
+            if (map.containsKey(key)) {
+                map.get(key).add(value);
+            }else{
+                map.put(key, List.of(value));
+            }
+        }
+        return map;
+    }
+
+    private Map<String, List<String>> initParameter() throws IOException {
+        // url parsing, content-length X
+        // body parsing, content-length O
+
+        if (this.getMethod().equals(Method.GET)) {
+            String urlKeyAndValues = splitFromSeparator(this.firstLines[1], "\\?")[1];
+            return parseParam(urlKeyAndValues);
+        }else{
+            if (contentLength != 0) {
+                char[] body = new char[contentLength];
+                this.bufferedReader.read(body, 0, contentLength);
+                String line = String.copyValueOf(body);
+                return parseParam(line);
+            }
+        }
+        return null;
+    }
+
     public Map<String, String> initHeader() throws IOException {
         // init header
         log.info("start processing parse request from inputStream ");
-        String l;
+        String line;
         Map<String, String> headers = new HashMap<>();
-        while (!(l = this.bufferedReader.readLine()).equals("")) {
-            String[] kv = splitFromSeparator(l, ": ");
+        while ((line = this.bufferedReader.readLine()).length() != 0) {
+            String[] kv = splitFromSeparator(line, ": ");
             headers.put(kv[0], kv[1]);
         }
         log.info("end processing parse request from inputStream ");

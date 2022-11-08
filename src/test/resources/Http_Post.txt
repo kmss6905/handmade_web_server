@@ -1,4 +1,4 @@
-GET /hello?userName=minshikkim&password=alstlrdl1! OK
+POST /hello OK
 Transfer-Encoding: chunked
 Date: Sat, 28 Nov 2009 04:36:25 GMT
 Server: LiteSpeed
@@ -9,6 +9,7 @@ Etag: "pub1259380237;gz"
 Cache-Control: max-age=3600, public
 Content-Type: text/html; charset=UTF-8
 Content-Encoding: gzip
+Content-Length: 39
 Vary: Accept-Encoding, Cookie, User-Agent
 
-userName=minshik&password=alstlrdl1!
+userName=minshikkim&password=alstlrdl1!
