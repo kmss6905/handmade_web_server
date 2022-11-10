@@ -1,9 +1,14 @@
 package http;
 
+import java.io.OutputStream;
 import java.util.Map;
 
 public class HttpResponse {
     private Map<String, String> header;
+
+    public HttpResponse(OutputStream outPutStream) {
+
+    }
 
     public void forward(String viewPath) {
 //        dos.writeBytes("HTTP/1.1 302 Redirect \r\n");
