@@ -1,19 +1,31 @@
 package http;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
 
 public class HttpResponseTest{
-    private String testDirectory = "./src/test/resources/";
+    private static final Logger log = LoggerFactory.getLogger(HttpResponseTest.class);
+    private static final String testDirectory = "./src/test/resources/";
 
     @Test
-    public void responseForward() throws FileNotFoundException {
-        HttpResponse response = new HttpResponse(createOutPutStream("Http_Forward.txt"));
+    public void responseForward() throws IOException {
+        HttpResponse response = new HttpResponse(createOutPutStream("Http_Forward.html"));
+
+        // when
         response.forward("index.html");
+
+
+        String path = testDirectory + "Http_Forward.html";
+        byte[] result = Files.readAllBytes(new File(path).toPath());
+        byte[] expected = Files.readAllBytes(new File("./webapp/index.html").toPath());
+
+        // then
+        Assert.assertArrayEquals(expected, result);
     }
 
     @Test

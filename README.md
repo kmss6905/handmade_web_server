@@ -76,4 +76,37 @@ Location: http://www.iana.org/domains/example/
 * 
 
 ### heroku 서버에 배포 후
-* 
+
+
+
+
+### Refactoring
+
+응답값을 리팩토링 하는 부분이다.
+먼저 테스트코드를 작성하였다.
+`index.html` 에 있는 파일의 내용을 `Http_Forward.html` 에 쓴 다음
+`index.html` 과 `Http_Forward.html`에 index.html 과 똑같은 파일내용이 써졌는 지 확인한다.
+
+단, byte 배열을 비교할 때는 Assert 의 assertArrayEquals() 을 사용해야한다. 
+
+```java
+
+    @Test
+    public void responseForward() throws FileNotFoundException {
+        HttpResponse response = new HttpResponse(createOutPutStream("Http_Forward.html"));
+        
+        // when
+        response.forward("index.html");
+
+        String path = testDirectory + "Http_Forward.txt";
+        byte[] result = Files.readAllBytes(new File(path).toPath());
+        byte[] expected = Files.readAllBytes(new File("./webapp/index.html").toPath());
+
+        // then
+        // Assert.assertEquals(expected, result);
+
+        // byte 배열은 이것을 사용해야함.
+        Assert.assertArrayEquals(expected, result);     
+    }
+
+```
